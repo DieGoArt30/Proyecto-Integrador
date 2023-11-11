@@ -5,4 +5,4 @@
 # Pedir el nombre del jugador por teclado.
 nombre_jugador = input("Nombre de Jugador: ")
 # Imprimir un mensaje de bienvenida con el nombre.
-print(f"Bienvenido al Laberinto ¡¡¡{nombre_jugador}!!!")
+print(f"Bienvenido, {nombre_jugador}! al juego de recorrer laberintos!.")
