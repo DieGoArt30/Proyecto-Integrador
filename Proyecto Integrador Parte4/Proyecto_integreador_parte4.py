@@ -1,39 +1,58 @@
 import os
-import sys
-import msvcrt
+from readchar import readkey, key
 
-def convertir_a_matriz(mapa):
-    return [list(fila) for fila in mapa.split("\n")]
+def convertir_mapa_a_matriz(laberinto):
+    # Dividir el laberinto en filas
+    filas = laberinto.split("\n")
+    matriz = [list(fila) for fila in filas]
+    return matriz
 
-def limpiar_y_mostrar(matriz):
+def limpiar_pantalla():
     os.system('cls' if os.name == 'nt' else 'clear')
-    for fila in matriz:
+
+def mostrar_mapa(mapa):
+    limpiar_pantalla()
+    for fila in mapa:
         print("".join(fila))
 
-def main_loop(mapa, pos_inicial, pos_final):
-    px, py = pos_inicial
+def verificar_posicion_valida(px, py, mapa):
+    return 0 <= px < len(mapa[0]) and 0 <= py < len(mapa) and mapa[py][px] != "#"
 
-    while (px, py) != pos_final:
-        mapa[px][py] = 'P'
-        limpiar_y_mostrar(mapa)
-        mapa[px][py] = '.'
+def actualizar_posicion(tecla, px, py, mapa):
+    movimientos = {
+        key.UP: (0, -1),
+        key.DOWN: (0, 1),
+        key.LEFT: (-1, 0),
+        key.RIGHT: (1, 0)
+    }
 
-        key = msvcrt.getch().decode('utf-8')
-        nueva_px, nueva_py = px, py
+    movimiento = movimientos.get(tecla, (0, 0))
+    nueva_px, nueva_py = px + movimiento[0], py + movimiento[1]
 
-        if key == 'w' and px > 0 and mapa[px - 1][py] != '#':
-            nueva_px -= 1
-        elif key == 's' and px < len(mapa) - 1 and mapa[px + 1][py] != '#':
-            nueva_px += 1
-        elif key == 'a' and py > 0 and mapa[px][py - 1] != '#':
-            nueva_py -= 1
-        elif key == 'd' and py < len(mapa[0]) - 1 and mapa[px][py + 1] != '#':
-            nueva_py += 1
+    if verificar_posicion_valida(nueva_px, nueva_py, mapa):
+        return nueva_px, nueva_py
+    else:
+        return px, py
 
-        px, py = nueva_px, nueva_py
+def main_loop(mapa, posicion_inicial, posicion_final):
+    px, py = posicion_inicial
 
-if __name__ == "__main__":
-    laberinto = """..###################
+    while (px, py) != posicion_final:
+        mapa[py][px] = "P"
+        mostrar_mapa(mapa)
+
+        # Leer la tecla presionada
+        tecla = readkey()
+
+        # Restaurar la posición anterior antes de verificar si la nueva posición es válida
+        mapa[py][px] = "."
+
+        # Actualizar la posición tentativa
+        px, py = actualizar_posicion(tecla, px, py, mapa)
+
+    print("¡Has logrado salir del Laberinto, nos vemos en el siguiente módulo!")
+
+laberinto = """..###################
 ....#...............#
 #.#.#####.#########.#
 #.#...........#.#.#.#
@@ -55,8 +74,9 @@ if __name__ == "__main__":
 #.....#.....#.#.#.#.#
 ###################.."""
 
-    matriz_laberinto = convertir_a_matriz(laberinto)
-    pos_inicial = (0, 0)
-    pos_final = (len(matriz_laberinto) - 1, len(matriz_laberinto[0]) - 1)
+mapa = convertir_mapa_a_matriz(laberinto)
+posicion_inicial = (0, 0)
+posicion_final = (len(mapa[0]) - 1, len(mapa) - 1)
 
-    main_loop(matriz_laberinto, pos_inicial, pos_final)
+main_loop(mapa, posicion_inicial, posicion_final)
+
